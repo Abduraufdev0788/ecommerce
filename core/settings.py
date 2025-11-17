@@ -42,7 +42,7 @@ INSTALLED_APPS = [
 
     # Local Apps
     'accounts.apps.AccountsConfig',
-    'store.apps.StoreConfig',
+    'products.apps.ProductsConfig',
 ]
 
 MIDDLEWARE = [
