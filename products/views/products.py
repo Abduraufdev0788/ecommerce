@@ -142,4 +142,8 @@ class ProductDetailView(View):
         return JsonResponse(data=result, status = 201)
 
     def delete(self, request: HttpRequest, pk: int) -> JsonResponse:
-        pass
+        category = get_object_or_404(Product, pk=pk)
+
+        category.delete()
+
+        return JsonResponse({'category': 'Deleted.'}, status=204)
