@@ -91,10 +91,55 @@ class ProductListView(View):
 
 class ProductDetailView(View):
     def get(self, request: HttpRequest, pk: int) -> JsonResponse:
-        pass
+        product = Product.objects.get(id = pk)
+        mahsulot = {
+                "id": product.pk,
+                "name": product.name,
+                "description": product.description,
+                "price":float(product.price),
+                "stock": product.stock,
+                "is_active": product.is_active,
+                "category": product.category.name,
+                "category_id": product.category_id,
+                "images": [
+                    {
+                        "id": img.id,
+                        "url": img.image.url,
+                        "alt_text": img.alt_text
+                    }
+                    for img in product.images.all()
+                ],
+                "created_at": product.created_at.isoformat(),
+                "updated_at": product.updated_at.isoformat(),
+                
+            }
+        return JsonResponse(data=mahsulot, status = 201)
 
     def put(self, request: HttpRequest, pk: int) -> JsonResponse:
-        pass
+        product = get_object_or_404(Product, pk=pk)
+        data = json.loads(request.body)
+
+        product.name = data.get("name", product.name)
+        product.price = data.get("price", product.price)
+        product.stock = data.get("stock", product.stock)
+        product.category_id = data.get("category_id", product.category_id)
+        product.is_active = data.get("is_active", product.is_active)
+        product.save()
+
+        result = {
+                    "id": product.pk,
+                    "name":product.name,
+                    "description": product.description,
+                    "price": product.price,
+                    "stock":product.stock,
+                    "is_active": product.is_active,
+                    "category": product.category.name,
+                    "category_id": product.category_id,
+                    "created_at": product.created_at.isoformat(),
+                    "updated_at": product.updated_at.isoformat()
+        }
+
+        return JsonResponse(data=result, status = 201)
 
     def delete(self, request: HttpRequest, pk: int) -> JsonResponse:
         pass
