@@ -56,6 +56,16 @@ class ProductImage(models.Model):
     )
     alt_text = models.CharField(max_length=256, blank=True, null=True)
     created_at = models.DateTimeField(auto_now_add=True)
+    
+    def to_dict(self, request) -> dict:
+        return {
+            "id": self.pk,
+            "url": f"{request.build_absolute_uri()}{self.image.url}",
+            "alt_text": self.alt_text,
+            "product_id": self.product.pk,
+            "product_name": self.product.name,
+            "created_at": self.created_at.isoformat()
+        }
 
     class Meta:
         ordering = ['created_at']
