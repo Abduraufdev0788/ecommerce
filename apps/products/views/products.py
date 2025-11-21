@@ -4,35 +4,13 @@ from django.views import View
 from django.http import JsonResponse, HttpRequest
 from django.shortcuts import get_object_or_404
 
-from ..models import Product, ProductImage, Category
+from ..models import Product, Category
 
 
 class ProductListView(View):
 
     def get(self, request: HttpRequest) -> JsonResponse:
-        products = []
-
-        for p in Product.objects.all().prefetch_related("images", "category"):
-            products.append({
-                "id": p.pk,
-                "name": p.name,
-                "description": p.description,
-                "price": str(p.price),
-                "stock": p.stock,
-                "is_active": p.is_active,
-                "category": p.category.name if p.category else None,
-                "category_id": p.category_id,
-                "images": [
-                    {
-                        "id": img.pk,
-                        "url": img.image.url,
-                        "alt_text": img.alt_text
-                    }
-                    for img in p.images.all()
-                ],
-                "created_at": p.created_at.isoformat(),
-                "updated_at": p.updated_at.isoformat(),
-            })
+        products = [p.to_dict() for p in Product.objects.all()]
 
         return JsonResponse({"products": products})
 
@@ -69,21 +47,7 @@ class ProductListView(View):
             is_active=data.get("is_active", True)
         )
 
-        return JsonResponse(
-            {
-                "id": product.pk,
-                "name": product.name,
-                "description": product.description,
-                "price": str(product.price),
-                "stock": product.stock,
-                "is_active": product.is_active,
-                "category": product.category.name if product.category else None,
-                "category_id": product.category_id,
-                "created_at": product.created_at.isoformat(),
-                "updated_at": product.updated_at.isoformat(),
-            },
-            status=201
-        )
+        return JsonResponse(product.to_dict(), status=201)
 
 
 class ProductDetailView(View):
@@ -91,33 +55,12 @@ class ProductDetailView(View):
     def get(self, request: HttpRequest, pk: int) -> JsonResponse:
         product = get_object_or_404(Product, pk=pk)
 
-        return JsonResponse({
-            "id": product.pk,
-            "name": product.name,
-            "description": product.description,
-            "price": str(product.price),
-            "stock": product.stock,
-            "is_active": product.is_active,
-            "category": product.category.name if product.category else None,
-            "category_id": product.category_id,
-            "images": [
-                {
-                    "id": img.pk,
-                    "url": img.image.url,
-                    "alt_text": img.alt_text
-                }
-                for img in product.images.all()
-            ],
-            "created_at": product.created_at.isoformat(),
-            "updated_at": product.updated_at.isoformat(),
-        })
+        return JsonResponse(product.to_dict())
 
 
     def put(self, request: HttpRequest, pk: int) -> JsonResponse:
         product = get_object_or_404(Product, pk=pk)
         data = json.loads(request.body)
-
-        print(data)
 
         category_id = data.get('category_id')
         category = None
@@ -126,7 +69,7 @@ class ProductDetailView(View):
 
         product = get_object_or_404(Product, pk=pk)
 
-        data = json.loads(request.body)
+        data = json.loads(request.body) if request.body else {}
 
         product.name = data.get('name', product.name)
         product.description = data.get('description', product.description)
@@ -136,21 +79,7 @@ class ProductDetailView(View):
 
         product.save()
 
-        return JsonResponse(
-            {
-                "id": product.pk,
-                "name": product.name,
-                "description": product.description,
-                "price": product.price,
-                "stock": product.stock,
-                "is_active": product.is_active,
-                "category": product.category.name if product.category else None,
-                "category_id": product.category_id,
-                "created_at": product.created_at.isoformat(),
-                "updated_at": product.updated_at.isoformat()
-            },
-            status=204
-        )
+        return JsonResponse(product.to_dict(), status=204)
     
     def delete(self, request: HttpRequest, pk:int) -> JsonResponse:
         product = get_object_or_404(Product, pk=pk)

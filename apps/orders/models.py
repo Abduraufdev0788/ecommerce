@@ -32,6 +32,23 @@ class Order(models.Model):
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
 
+    def __str__(self):
+        return self.user.username
+    
+
+    def to_dict(self) -> dict:
+        return {
+            'id': self.pk,
+            'total_price': self.total_price,
+            'status': self.status,
+            'payment_status': self.payment_status,
+            'address': self.address,
+            'created_at': self.created_at.isoformat(),
+            'updated_at': self.updated_at.isoformat(),
+            'items': [i.to_dict() for i in self.items.all()],
+            'user': self.user.to_dict()
+        }
+
 
 class OrderItem(models.Model):
     order = models.ForeignKey(
@@ -47,3 +64,10 @@ class OrderItem(models.Model):
     )
     quantity = models.PositiveIntegerField(default=1)
     total = models.DecimalField(max_digits=12, decimal_places=2)
+
+    def to_dict(self) -> dict:
+        return {
+            'id': self.pk,
+            'quantity': self.quantity,
+            'total': self.total
+        }

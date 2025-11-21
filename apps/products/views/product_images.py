@@ -7,17 +7,7 @@ from ..models import Product, ProductImage
 
 class ProductImageListView(View):
     def get(self, request: HttpRequest) -> JsonResponse:
-        images = [
-            {
-                "id": image.pk,
-                "url": f"{request.build_absolute_uri()}{image.image.url}",
-                "alt_text": image.alt_text,
-                "product_id": image.product.pk,
-                "product_name": image.product.name,
-                "created_at": image.created_at.isoformat()
-            }
-            for image in ProductImage.objects.all()
-        ]
+        images = [image.to_dict() for image in ProductImage.objects.all()]
         return JsonResponse({'images': images})
 
     def post(self, request: HttpRequest) -> JsonResponse:
@@ -39,34 +29,14 @@ class ProductImageListView(View):
         )
         new_image.save()
 
-        return JsonResponse(
-            {
-                "id": new_image.pk,
-                "url": f"{request.build_absolute_uri()}{new_image.image.url}",
-                "alt_text": new_image.alt_text,
-                "product_id": new_image.product.pk,
-                "product_name": new_image.product.name,
-                "created_at": new_image.created_at.isoformat()
-            },
-            status=201
-        )
+        return JsonResponse(new_image.to_dict(), status=201)
 
 
 class ProductImageDetailView(View):
     def get(self, request: HttpRequest, pk: int) -> JsonResponse:
         image = get_object_or_404(ProductImage, pk=pk)
 
-        return JsonResponse(
-            {
-                "id": image.pk,
-                "url": f"{request.build_absolute_uri()}{image.image.url}",
-                "alt_text": image.alt_text,
-                "product_id": image.product.pk,
-                "product_name": image.product.name,
-                "created_at": image.created_at.isoformat()
-            },
-            status=201
-        )
+        return JsonResponse(image.to_dict(), status=201)
 
     def put(self, request: HttpRequest, pk: int) -> JsonResponse:
         image = get_object_or_404(ProductImage, pk=pk)
@@ -75,17 +45,7 @@ class ProductImageDetailView(View):
 
         image.alt_text = data.get('alt_text', image.alt_text)
 
-        return JsonResponse(
-            {
-                "id": image.pk,
-                "url": f"{request.build_absolute_uri()}{image.image.url}",
-                "alt_text": image.alt_text,
-                "product_id": image.product.pk,
-                "product_name": image.product.name,
-                "created_at": image.created_at.isoformat()
-            },
-            status=204
-        )
+        return JsonResponse(image.to_dict(), status=204)
 
     def delete(self, request: HttpRequest, pk: int) -> JsonResponse:
         impage = get_object_or_404(ProductImage, pk=pk)

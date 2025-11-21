@@ -10,6 +10,15 @@ class User(models.Model):
     def __str__(self):
         return self.username
     
+    def to_dict(self) -> dict:
+        return {
+            'id': self.pk,
+            'username': self.username,
+            'password': self.password,
+            'email': self.email,
+            'phone': self.phone,
+        }
+    
     
 class Profile(models.Model):
     first_name = models.CharField(max_length=128, blank=True, null=True)

@@ -2,7 +2,7 @@ from django.views import View
 from django.http import JsonResponse, HttpRequest
 from django.db.models import Q
 
-from ..models import Category, Product, ProductImage
+from ..models import Product
 
 
 class ProductSearchView(View):
@@ -40,27 +40,6 @@ class ProductSearchView(View):
             elif in_stock == 'false':
                 products = products.filter(stock=0)
 
-        result = []
-        for p in products:
-            result.append({
-                "id": p.pk,
-                "name": p.name,
-                "description": p.description,
-                "price": p.price,
-                "stock": p.stock,
-                "is_active": p.is_active,
-                "category": p.category.name if p.category else None,
-                "category_id": p.category_id,
-                "images": [
-                    {
-                        "id": img.pk,
-                        "url": img.image.url,
-                        "alt_text": img.alt_text
-                    }
-                    for img in p.images.all()
-                ],
-                "created_at": p.created_at.isoformat(),
-                "updated_at": p.updated_at.isoformat(),
-            })
+        result = [p.to_dict() for p in products]
 
         return JsonResponse({"products": result, "result": len(result)})

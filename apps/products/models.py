@@ -45,6 +45,20 @@ class Product(models.Model):
 
     def __str__(self):
         return self.name
+    
+    def to_dict(self) -> dict:
+        return {
+            "id": self.pk,
+            "name": self.name,
+            "description": self.description,
+            "price": self.price,
+            "stock": self.stock,
+            "is_active": self.is_active,
+            "category": self.category.to_dict() if self.category else None,
+            "images": [img.to_dict() for img in self.images.all()],
+            "created_at": self.created_at.isoformat(),
+            "updated_at": self.updated_at.isoformat(),
+        }
 
 
 class ProductImage(models.Model):
@@ -56,6 +70,14 @@ class ProductImage(models.Model):
     )
     alt_text = models.CharField(max_length=256, blank=True, null=True)
     created_at = models.DateTimeField(auto_now_add=True)
+    
+    def to_dict(self) -> dict:
+        return {
+            "id": self.pk,
+            "url": self.image.url,
+            "alt_text": self.alt_text,
+            "created_at": self.created_at.isoformat()
+        }
 
     class Meta:
         ordering = ['created_at']
