@@ -9,16 +9,7 @@ from ..models import Category
 
 class CategoryListView(View):
     def get(self, request: HttpRequest) -> JsonResponse:
-        categories = [
-            {
-                "id": cat.pk,
-                "name": cat.name,
-                "description": cat.description,
-                "created_at": cat.created_at.isoformat(),
-                "updated_at": cat.updated_at.isoformat()
-            }
-            for cat in Category.objects.all()
-        ]
+        categories = [cat.to_dict() for cat in Category.objects.all()]
 
         return JsonResponse({'categories': categories})
 
@@ -41,16 +32,7 @@ class CategoryListView(View):
             )
             category.save()
 
-            return JsonResponse(
-                {
-                    "id": category.pk,
-                    "name": category.name,
-                    "description": category.description,
-                    "created_at": category.created_at.isoformat(),
-                    "updated_at": category.updated_at.isoformat()
-                },
-                status=201
-            )
+            return JsonResponse(category.to_dict(), status=201)
 
 
 class CategoryDetailView(View):
@@ -62,13 +44,7 @@ class CategoryDetailView(View):
         # except Category.DoesNotExist:
         #     return JsonResponse({'category': 'not found.'}, status=404)
         
-        return JsonResponse({
-                "id": category.pk,
-                "name": category.name,
-                "description": category.description,
-                "created_at": category.created_at.isoformat(),
-                "updated_at": category.updated_at.isoformat()
-            })
+        return JsonResponse(category.to_dict())
 
     def put(self, request: HttpRequest, pk: int) -> JsonResponse:
         category = get_object_or_404(Category, pk=pk)
@@ -80,16 +56,7 @@ class CategoryDetailView(View):
 
         category.save()
 
-        return JsonResponse(
-            {
-                "id": category.pk,
-                "name": category.name,
-                "description": category.description,
-                "created_at": category.created_at.isoformat(),
-                "updated_at": category.updated_at.isoformat()
-            },
-            status=204
-        )
+        return JsonResponse(category.to_dict(), status=204)
 
     def delete(self, request: HttpRequest, pk: int) -> JsonResponse:
         category = get_object_or_404(Category, pk=pk)

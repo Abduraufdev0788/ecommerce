@@ -485,6 +485,182 @@ image: [binary file] (optional)
 
 ---
 
+# Orders API Documentation
+
+## Base URL
+```
+http://localhost:8000/api/orders/
+```
+
+---
+
+## 📋 Endpoints
+
+### 1. Create Order
+**POST** `/orders/create/`
+
+Create a new order directly from product IDs.
+
+**Request:**
+```json
+{
+  "customer_name": "John Doe",
+  "customer_email": "john@example.com",
+  "customer_phone": "+1234567890",
+  "shipping_address": "123 Main St",
+  "shipping_city": "New York",
+  "shipping_state": "NY",
+  "shipping_postal_code": "10001",
+  "shipping_country": "USA",
+  "items": [
+    {"product_id": 1, "quantity": 2},
+    {"product_id": 5, "quantity": 1}
+  ],
+  "notes": "Deliver after 5 PM"
+}
+```
+
+**Response:** `201 Created`
+```json
+{
+  "message": "Order created successfully",
+  "order": {
+    "id": 1,
+    "order_number": "ORD-A1B2C3D4",
+    "customer_name": "John Doe",
+    "status": "pending",
+    "items": [
+      {
+        "product_name": "iPhone 15 Pro",
+        "quantity": 2,
+        "price": "999.99",
+        "total": "1999.98"
+      }
+    ],
+    "subtotal": "2249.97",
+    "total": "2249.97",
+    "created_at": "2025-01-15T10:30:00Z"
+  }
+}
+```
+
+---
+
+### 2. List My Orders
+**GET** `/orders/`
+
+Get all orders for logged-in user.
+
+**Query Parameters:**
+- `status` - Filter by status (optional)
+
+**Response:** `200 OK`
+```json
+{
+  "orders": [
+    {
+      "order_number": "ORD-A1B2C3D4",
+      "customer_name": "John Doe",
+      "status": "pending",
+      "total": "2249.97",
+      "created_at": "2025-01-15T10:30:00Z"
+    }
+  ]
+}
+```
+
+---
+
+### 3. Get Order Details
+**GET** `/orders/{order_number}/`
+
+Get full order details.
+
+**Response:** `200 OK`
+```json
+{
+  "order_number": "ORD-A1B2C3D4",
+  "customer_name": "John Doe",
+  "customer_email": "john@example.com",
+  "shipping_address": {
+    "address": "123 Main St",
+    "city": "New York",
+    "state": "NY",
+    "postal_code": "10001",
+    "country": "USA"
+  },
+  "status": "pending",
+  "items": [
+    {
+      "product_name": "iPhone 15 Pro",
+      "quantity": 2,
+      "price": "999.99",
+      "total": "1999.98"
+    }
+  ],
+  "subtotal": "2249.97",
+  "total": "2249.97",
+  "notes": "Deliver after 5 PM",
+  "created_at": "2025-01-15T10:30:00Z"
+}
+```
+
+---
+
+### 4. Update Order Status (Staff Only)
+**PUT** `/orders/{order_number}/status/`
+
+Update order status.
+
+**Request:**
+```json
+{
+  "status": "shipped",
+  "notes": "Shipped via FedEx"
+}
+```
+
+**Valid Status:**
+- `pending` → `processing` → `shipped` → `delivered`
+- `cancelled`
+
+**Response:** `200 OK`
+```json
+{
+  "message": "Order status updated",
+  "order_number": "ORD-A1B2C3D4",
+  "status": "shipped"
+}
+```
+
+---
+
+### 5. Cancel Order
+**POST** `/orders/{order_number}/cancel/`
+
+Cancel order and restore stock (only pending/processing orders).
+
+**Response:** `200 OK`
+```json
+{
+  "message": "Order cancelled successfully",
+  "order_number": "ORD-A1B2C3D4"
+}
+```
+
+---
+
+## 🔄 Order Status Flow
+
+```
+pending → processing → shipped → delivered
+   ↓
+cancelled
+```
+
+---
+
+
 ## Common HTTP Status Codes
 
 | Code | Description |

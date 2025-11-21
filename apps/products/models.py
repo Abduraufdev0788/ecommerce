@@ -13,6 +13,15 @@ class Category(models.Model):
 
     def __str__(self):
         return self.name
+    
+    def to_dict(self) -> dict:
+        return {
+            "id": self.pk,
+            "name": self.name,
+            "description": self.description,
+            "created_at": self.created_at.isoformat(),
+            "updated_at": self.updated_at.isoformat()
+        }
 
 
 class Product(models.Model):
